@@ -16,20 +16,18 @@ import { Platform } from 'react-native';
  */
 function resolveBaseUrl() {
   const fromEnv =
-    typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL
-      ? String(process.env.EXPO_PUBLIC_API_URL).trim().replace(/\/+$/, '')
-      : '';
+    process.env.EXPO_PUBLIC_API_URL?.trim()?.replace(/\/+$/, '');
+
   if (fromEnv) {
     return fromEnv.endsWith('/api') ? fromEnv : `${fromEnv}/api`;
   }
-  const port = process.env.EXPO_PUBLIC_API_PORT || '5000';
-  if (Platform.OS === 'web') {
-    return `http://localhost:${port}/api`;
+
+  // ALWAYS fallback to Railway if not local dev
+  if (__DEV__) {
+    return 'http://192.168.1.3:5000/api';
   }
-  if (Platform.OS === 'android') {
-    return `http://10.0.2.2:${port}/api`;
-  }
-  return `http://192.168.1.3:${port}/api`;
+
+  return 'https://wmt-production-784a.up.railway.app/api';
 }
 
 const BASE_URL = resolveBaseUrl();

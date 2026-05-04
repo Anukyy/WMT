@@ -6,12 +6,20 @@ import { bootstrapData } from "./seed/bootstrap.js";
 
 const app = createApp();
 
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 async function main() {
   let dbConnected = false;
   try {
     await mongoose.connect(config.mongoUri, { serverSelectionTimeoutMS: 8000 });
     dbConnected = true;
-    await bootstrapData();
+    try {
+      await bootstrapData();
+    } catch (e) {
+      console.error("Bootstrap failed (ignored for startup):", e);
+    }
   } catch (err) {
     console.error("MongoDB connection failed; starting API without DB.");
     console.error(err);
@@ -44,7 +52,7 @@ async function main() {
     });
   };
 
-  startServer(config.port);
+  startServer(process.env.PORT || config.port || 5000);
 }
 
 main().catch((err) => {
